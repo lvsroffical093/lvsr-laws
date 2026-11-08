@@ -66,8 +66,8 @@ if not WEBAPP_URL.startswith("https://"):
 API = f"https://api.telegram.org/bot{TOKEN}/"
 
 WELCOME = (
-    "<b>Латвийская Виртуальная Социалистическая Республика</b>\n\n"
-    "Нажми кнопку ниже, чтобы открыть меню: законы и конституция."
+    "<b>Вы открыли информационное табло Латвийской Виртуальной Социалистической Республики.</b>\n\n"
+    "Нажмите ниже, чтобы открыть меню с выбором двух разделов: Законы и Конституция."
 )
 
 
@@ -142,7 +142,7 @@ def setup():
     call("deleteWebhook", drop_pending_updates=False)
     # Кнопка меню слева от поля ввода в личке с ботом.
     call("setChatMenuButton", menu_button={"type": "web_app", "text": "Меню", "web_app": {"url": WEBAPP_URL}})
-    commands = [{"command": "info", "description": "Меню ЛВСР: законы и конституция"}]
+    commands = [{"command": "info", "description": "Информационное табло для прочтения Конституции или правил"}]
     for scope in ("default", "all_private_chats", "all_group_chats", "all_chat_administrators"):
         call("setMyCommands", commands=commands, scope={"type": scope})
     return me["username"]
