@@ -55,6 +55,7 @@
     background: rgba(82, 136, 193, 0.18); color: var(--link);
     display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600;
   }
+  .num.emoji { font-size: 18px; font-weight: 400; }
   .item .t { flex: 1; min-width: 0; }
   .item .t b { display: block; font-weight: 500; }
   .item .t span { display: block; color: var(--hint); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -183,6 +184,19 @@ const INTRO = {
     ["Бан", "Окончательное отстранение собеседника"]
   ],
   sign: "С уважением, Латвийская ВСР"
+};
+
+// Эмодзи в квадратике у каждой статьи (по номеру статьи)
+const EMOJI = {
+  "1": "🤬", // Оскорбление
+  "2": "🔞", // Порнография
+  "3": "📨", // Спам
+  "4": "🚫", // Неонацистская символика
+  "5": "🌍", // Расизм
+  "6": "📣", // Реклама
+  "7": "💣", // Терроризм
+  "8": "🔐", // Личные данные
+  "9": "🩸"  // Жестокость
 };
 
 const ARTICLES = [
@@ -351,8 +365,8 @@ function renderList(filter) {
   if (!hits.length) { box.innerHTML = '<div class="empty">Ничего не найдено</div>'; return; }
   box.innerHTML = hits.map(([a, i]) => `
     <button class="item" data-open="${i}">
-      <div class="num">${esc(a.num)}</div>
-      <div class="t"><b>${esc(a.title)}</b><span>${esc(a.subtitle || a.text[0])}</span></div>
+      <div class="num emoji">${EMOJI[a.num] || esc(a.num)}</div>
+      <div class="t"><b>${esc(a.title)}</b><span>Статья ${esc(a.num)} · ${esc(a.subtitle || a.text[0])}</span></div>
       <div class="chev">›</div>
     </button>`).join("");
 }
