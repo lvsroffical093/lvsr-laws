@@ -66,8 +66,8 @@ if not WEBAPP_URL.startswith("https://"):
 API = f"https://api.telegram.org/bot{TOKEN}/"
 
 WELCOME = (
-    "<b>Законы Латвийской Виртуальной Социалистической Республики</b>\n\n"
-    "Нажми кнопку ниже, чтобы открыть законы."
+    "<b>Латвийская Виртуальная Социалистическая Республика</b>\n\n"
+    "Нажми кнопку ниже, чтобы открыть меню: законы и конституция."
 )
 
 
@@ -128,11 +128,11 @@ def send_laws(chat_id, keyboard):
 
 def laws_keyboard(chat_type, bot_username):
     if chat_type == "private":
-        button = {"text": "📜 Открыть законы", "web_app": {"url": WEBAPP_URL}}
+        button = {"text": "📂 Открыть меню", "web_app": {"url": WEBAPP_URL}}
     else:
         # В группах кнопка web_app запрещена, поэтому даём прямую ссылку на Mini App:
         # она открывает окно с законами прямо поверх чата (нужно включить Mini App в BotFather).
-        button = {"text": "📜 Открыть законы", "url": f"https://t.me/{bot_username}?startapp"}
+        button = {"text": "📂 Открыть меню", "url":f"https://t.me/{bot_username}?startapp"}
     return {"inline_keyboard": [[button]]}
 
 
@@ -141,8 +141,8 @@ def setup():
     # Убираем вебхук, который оставил Puzzle Bot (иначе бот не получит сообщения).
     call("deleteWebhook", drop_pending_updates=False)
     # Кнопка меню слева от поля ввода в личке с ботом.
-    call("setChatMenuButton", menu_button={"type": "web_app", "text": "Законы", "web_app": {"url": WEBAPP_URL}})
-    commands = [{"command": "info", "description": "Законы ЛВСР"}]
+    call("setChatMenuButton", menu_button={"type": "web_app", "text": "Меню", "web_app": {"url": WEBAPP_URL}})
+    commands = [{"command": "info", "description": "Меню ЛВСР: законы и конституция"}]
     for scope in ("default", "all_private_chats", "all_group_chats", "all_chat_administrators"):
         call("setMyCommands", commands=commands, scope={"type": scope})
     return me["username"]
