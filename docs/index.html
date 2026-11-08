@@ -153,6 +153,7 @@
   .pn-info div { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .trait { border: 1px solid #4fb3a9; padding: 6px 8px 8px; text-align: center; font-size: 14px; }
   .trait .bar { height: 5px; margin-top: 6px; background: linear-gradient(90deg, #7fe0d2, #3e9e93); border-radius: 3px; }
+  .const-img { display: block; width: 100%; height: auto; border-radius: 6px; border: 1px solid #000; }
   .wip { margin-top: 14px; border: 2px dashed #41474d; border-radius: 4px; padding: 14px 16px; text-align: center; color: var(--hint); }
   .wip b { display: block; color: var(--text); font: 16px "Russo One", sans-serif; letter-spacing: 1px; margin-bottom: 4px; }
 </style>
@@ -171,38 +172,7 @@
 
   <section class="screen" id="const">
     <button class="back" data-back>‹ Назад</button>
-    <div class="tno">
-      <div class="pn pn-flag"><img src="flag.jpg" alt="Флаг ЛВСР"></div>
-      <div class="pn pn-head">
-        <div class="emb">☭</div>
-        <div class="lines">
-          <div>Латвийская ВСР</div>
-          <div>Без фракции</div>
-          <div>Глава: —</div>
-        </div>
-      </div>
-      <div class="pn pn-portrait">
-        <svg viewBox="0 0 100 130" aria-label="Портрет главы (заглушка)">
-          <rect width="100" height="130" fill="#d9d4c7"/>
-          <circle cx="50" cy="48" r="22" fill="#55524c"/>
-          <path d="M8 130 C10 96 28 82 50 82 C72 82 90 96 92 130 Z" fill="#3a3834"/>
-          <path d="M43 82 L50 100 L57 82 Z" fill="#e9e4d8"/>
-          <text x="50" y="52" text-anchor="middle" font-size="16" fill="#d9d4c7" font-family="sans-serif">?</text>
-        </svg>
-      </div>
-      <div class="tno-right">
-        <div class="pn pn-ico"><div class="pie" title="Состав партий (пример)"></div></div>
-        <div class="pn pn-info">
-          <div>Партия: —</div>
-          <div>Социализм</div>
-          <div>Выборы: —</div>
-        </div>
-        <div class="pn pn-ico"><div class="medal">☭</div></div>
-        <div class="pn pn-info">
-          <div class="trait">Черта лидера: —<div class="bar"></div></div>
-        </div>
-      </div>
-    </div>
+    <img class="const-img" src="constitution.jpg" alt="ЛВСР — Латвийская ВСР, ЛКП (В), Виртуальный Коммунизм, выборы не проводятся, проект: Конституция 2000">
     <div class="wip">
       <b>Конституция в разработке</b>
       Здесь появятся статьи конституции с подробным описанием и картинками.
