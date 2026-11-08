@@ -7,12 +7,38 @@
 """
 
 import json
+import socket
 import time
 import urllib.error
 import urllib.request
+from datetime import datetime
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
+LOG_FILE = HERE / "bot.log"
+
+
+def log(*parts):
+    line = f"[{datetime.now():%d.%m.%Y %H:%M:%S}] " + " ".join(str(p) for p in parts)
+    print(line)  # при запуске без окна (pythonw) просто ничего не делает
+    try:
+        if LOG_FILE.exists() and LOG_FILE.stat().st_size > 1_000_000:
+            LOG_FILE.replace(HERE / "bot.old.log")
+        with LOG_FILE.open("a", encoding="utf-8") as f:
+            f.write(line + "\n")
+    except OSError:
+        pass
+
+
+def single_instance():
+    # Не даём запустить второго бота одновременно (иначе они мешают друг другу).
+    lock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    try:
+        lock.bind(("127.0.0.1", 47719))
+    except OSError:
+        log("Бот уже запущен в другом окне или в фоне. Этот экземпляр закрывается.")
+        raise SystemExit(0)
+    return lock
 
 
 def load_env():
@@ -58,12 +84,55 @@ def call(method, **params):
     return result["result"]
 
 
+PHOTO_FILE = HERE / "laws.jpg"
+PHOTO_ID = None  # после первой загрузки Telegram даёт id картинки, дальше шлём по нему
+
+
+def call_with_file(method, field, path, **params):
+    boundary = "----lvsr" + str(int(time.time() * 1000))
+    body = bytearray()
+    for key, value in params.items():
+        if not isinstance(value, str):
+            value = json.dumps(value, ensure_ascii=False)
+        body += f'--{boundary}\r\nContent-Disposition: form-data; name="{key}"\r\n\r\n{value}\r\n'.encode("utf-8")
+    body += (f'--{boundary}\r\nContent-Disposition: form-data; name="{field}"; filename="{path.name}"\r\n'
+             f"Content-Type: image/jpeg\r\n\r\n").encode("utf-8")
+    body += path.read_bytes() + f"\r\n--{boundary}--\r\n".encode("utf-8")
+    req = urllib.request.Request(API + method, data=bytes(body),
+                                 headers={"Content-Type": f"multipart/form-data; boundary={boundary}"})
+    try:
+        with urllib.request.urlopen(req, timeout=60) as resp:
+            result = json.load(resp)
+    except urllib.error.HTTPError as e:
+        result = json.load(e)
+    if not result.get("ok"):
+        raise RuntimeError(f"{method}: {result.get('description')}")
+    return result["result"]
+
+
+def send_laws(chat_id, keyboard):
+    global PHOTO_ID
+    if not PHOTO_FILE.exists():
+        call("sendMessage", chat_id=chat_id, text=WELCOME, parse_mode="HTML", reply_markup=keyboard)
+        return
+    params = dict(chat_id=chat_id, caption=WELCOME, parse_mode="HTML", reply_markup=keyboard)
+    if PHOTO_ID:
+        try:
+            call("sendPhoto", photo=PHOTO_ID, **params)
+            return
+        except RuntimeError:
+            PHOTO_ID = None  # id устарел — загрузим файл заново
+    sent = call_with_file("sendPhoto", "photo", PHOTO_FILE, **params)
+    PHOTO_ID = sent["photo"][-1]["file_id"]
+
+
 def laws_keyboard(chat_type, bot_username):
     if chat_type == "private":
         button = {"text": "📜 Открыть законы", "web_app": {"url": WEBAPP_URL}}
     else:
-        # В группах Telegram не разрешает кнопку web_app, поэтому ведём в личку с ботом.
-        button = {"text": "📜 Открыть законы", "url": f"https://t.me/{bot_username}?start=laws"}
+        # В группах кнопка web_app запрещена, поэтому даём прямую ссылку на Mini App:
+        # она открывает окно с законами прямо поверх чата (нужно включить Mini App в BotFather).
+        button = {"text": "📜 Открыть законы", "url": f"https://t.me/{bot_username}?startapp"}
     return {"inline_keyboard": [[button]]}
 
 
@@ -73,32 +142,56 @@ def setup():
     call("deleteWebhook", drop_pending_updates=False)
     # Кнопка меню слева от поля ввода в личке с ботом.
     call("setChatMenuButton", menu_button={"type": "web_app", "text": "Законы", "web_app": {"url": WEBAPP_URL}})
-    call("setMyCommands", commands=[
-        {"command": "start", "description": "Открыть законы"},
-        {"command": "laws", "description": "Законы ЛВСР"},
-    ])
+    commands = [{"command": "info", "description": "Законы ЛВСР"}]
+    for scope in ("default", "all_private_chats", "all_group_chats", "all_chat_administrators"):
+        call("setMyCommands", commands=commands, scope={"type": scope})
     return me["username"]
+
+
+CLEANED_CHATS = set()
+
+
+def clean_chat_commands(chat_id):
+    # Puzzle Bot мог оставить в группе свой список команд, который перекрывает наш.
+    if chat_id in CLEANED_CHATS:
+        return
+    CLEANED_CHATS.add(chat_id)
+    try:
+        call("deleteMyCommands", scope={"type": "chat", "chat_id": chat_id})
+    except Exception as e:
+        log("Не удалось сбросить старые команды в чате:", e)
 
 
 def handle(update, bot_username):
     msg = update.get("message")
     if not msg or "text" not in msg:
         return
-    command = msg["text"].split()[0].split("@")[0].lower()
-    if command not in ("/start", "/laws", "/rules", "/законы"):
+    if msg["chat"]["type"] != "private":
+        clean_chat_commands(msg["chat"]["id"])
+    first = msg["text"].split()[0].lower()
+    command, _, mention = first.partition("@")
+    if mention and mention != bot_username.lower():
+        return  # команда адресована другому боту
+    is_private = msg["chat"]["type"] == "private"
+    # Отвечаем только на /info. /start — лишь в личке (это кнопка «Начать» при первом заходе к боту).
+    if not (command == "/info" or (command == "/start" and is_private)):
         return
-    call(
-        "sendMessage",
-        chat_id=msg["chat"]["id"],
-        text=WELCOME,
-        parse_mode="HTML",
-        reply_markup=laws_keyboard(msg["chat"]["type"], bot_username),
-    )
+    send_laws(msg["chat"]["id"], laws_keyboard(msg["chat"]["type"], bot_username))
 
 
 def main():
-    bot_username = setup()
-    print(f"Бот @{bot_username} запущен. Остановить: Ctrl+C")
+    _lock = single_instance()
+    # При включении компьютера интернет может появиться не сразу, поэтому ждём.
+    while True:
+        try:
+            bot_username = setup()
+            break
+        except KeyboardInterrupt:
+            return
+        except Exception as e:
+            log("Не удалось подключиться к Telegram, пробую снова через 15 секунд:", e)
+            time.sleep(15)
+    log(f"Бот @{bot_username} запущен.")
     offset = 0
     while True:
         try:
@@ -108,12 +201,12 @@ def main():
                 try:
                     handle(upd, bot_username)
                 except Exception as e:
-                    print("Ошибка при ответе:", e)
+                    log("Ошибка при ответе:", e)
         except KeyboardInterrupt:
-            print("Остановлен.")
+            log("Остановлен.")
             break
         except Exception as e:
-            print("Нет связи с Telegram, пробую снова через 5 секунд:", e)
+            log("Нет связи с Telegram, пробую снова через 5 секунд:", e)
             time.sleep(5)
 
 
