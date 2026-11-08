@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Законы ЛВСР</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  :root {
+    --bg: var(--tg-theme-bg-color, #17212b);
+    --bg2: var(--tg-theme-secondary-bg-color, #0e1621);
+    --text: var(--tg-theme-text-color, #f5f5f5);
+    --hint: var(--tg-theme-hint-color, #8b9aa8);
+    --link: var(--tg-theme-link-color, #5eb5f7);
+    --accent: var(--tg-theme-button-color, #5288c1);
+    --accent-text: var(--tg-theme-button-text-color, #ffffff);
+    --card: var(--tg-theme-section-bg-color, #1f2c3a);
+    --sep: rgba(127, 140, 153, 0.18);
+    --warn: #e0a43a;
+    --danger: #e5534b;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg2);
+    color: var(--text);
+    font: 16px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    min-height: 100vh;
+  }
+  .wrap { max-width: 640px; margin: 0 auto; padding: 16px 16px 40px; }
+  .screen { display: none; animation: fade .18s ease-out; }
+  .screen.on { display: block; }
+  @keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+  .hero { text-align: center; padding: 12px 8px 20px; }
+  .emblem {
+    width: 64px; height: 64px; margin: 0 auto 12px; border-radius: 50%;
+    background: var(--accent); color: var(--accent-text);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 20px; letter-spacing: .5px;
+  }
+  .hero h1 { margin: 0 0 4px; font-size: 22px; }
+  .hero p { margin: 0; color: var(--hint); font-size: 14px; }
+
+  .label { color: var(--hint); font-size: 13px; text-transform: uppercase; letter-spacing: .4px; margin: 20px 4px 8px; }
+  .list { background: var(--card); border-radius: 14px; overflow: hidden; }
+  .item {
+    display: flex; align-items: center; gap: 12px; width: 100%;
+    padding: 12px 14px; background: none; border: 0; color: inherit; font: inherit;
+    text-align: left; cursor: pointer;
+  }
+  .item + .item { border-top: 1px solid var(--sep); }
+  .item:active { background: var(--sep); }
+  .num {
+    flex: none; min-width: 40px; height: 32px; padding: 0 6px; border-radius: 8px;
+    background: rgba(82, 136, 193, 0.18); color: var(--link);
+    display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600;
+  }
+  .item .t { flex: 1; min-width: 0; }
+  .item .t b { display: block; font-weight: 500; }
+  .item .t span { display: block; color: var(--hint); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .chev { color: var(--hint); flex: none; }
+
+  .search {
+    width: 100%; padding: 10px 14px; border-radius: 12px; border: 0; outline: none;
+    background: var(--card); color: var(--text); font: inherit;
+  }
+  .search::placeholder { color: var(--hint); }
+
+  .art-head { padding: 8px 4px 4px; }
+  .art-head .num { display: inline-flex; margin-bottom: 10px; }
+  .art-head h2 { margin: 0; font-size: 21px; line-height: 1.3; }
+  .card { background: var(--card); border-radius: 14px; padding: 14px 16px; }
+  .card p { margin: 0; }
+  .card p + p { margin-top: 10px; }
+  .term + .term { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--sep); }
+  .term b { display: block; color: var(--link); font-weight: 500; margin-bottom: 2px; }
+  .pen { display: flex; gap: 12px; align-items: flex-start; }
+  .pen + .pen { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--sep); }
+  .pen .n {
+    flex: none; width: 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700;
+    background: rgba(224, 164, 58, 0.18); color: var(--warn);
+  }
+  .pen.ban .n { background: rgba(229, 83, 75, 0.18); color: var(--danger); }
+  .pen .w { color: var(--hint); font-size: 13px; }
+  .sign { text-align: right; color: var(--hint); font-style: italic; margin-top: 12px; }
+  .back {
+    display: none; margin: 0 0 8px; padding: 6px 2px; background: none; border: 0;
+    color: var(--link); font: inherit; cursor: pointer;
+  }
+  body.no-tg .back { display: inline-block; }
+  .empty { text-align: center; color: var(--hint); padding: 20px; }
+  .foot { text-align: center; color: var(--hint); font-size: 12px; margin-top: 28px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <section class="screen on" id="home">
+    <div class="hero">
+      <div class="emblem">ЛВСР</div>
+      <h1>Законы ЛВСР</h1>
+      <p>Латвийская Виртуальная Социалистическая Республика</p>
+    </div>
+
+    <div class="list">
+      <button class="item" data-open="intro">
+        <div class="num">§</div>
+        <div class="t"><b>Общие положения</b><span>Прочитайте перед вступлением в чат</span></div>
+        <div class="chev">›</div>
+      </button>
+    </div>
+
+    <div class="label">Статьи</div>
+    <input class="search" id="q" type="search" placeholder="Поиск по законам">
+    <div class="list" id="arts" style="margin-top:10px"></div>
+    <div class="foot">@LVSRhelper_bot</div>
+  </section>
+
+  <section class="screen" id="view">
+    <button class="back" id="backBtn">‹ Назад</button>
+    <div id="viewBody"></div>
+  </section>
+</div>
+
+<script>
+const INTRO = {
+  title: "Общие положения",
+  paragraphs: [
+    "Если вы не прочитали законы, изложенные ниже, вы всё равно несёте за себя ответственность.",
+    "Администрация проверяет удалённые сообщения в чате. Если вы удалили сообщение с нарушением, но оно не пропало из журнала в течение 24 часов, вы всё равно будете наказаны.",
+    "Нарушение «ради исторической справки» или «в научных целях» тоже наказывается.",
+    "Если после наказания вы покинете чат, то при возвращении вам повторно выдадут то же наказание."
+  ],
+  terms: [
+    ["Мут", "Временное ограничение права участника отправлять сообщения"],
+    ["Варн", "Строгое предупреждение и повторное ограничение прав"],
+    ["Бан", "Окончательное отстранение собеседника"]
+  ],
+  sign: "С уважением, Латвийская ВСР"
+};
+
+const ARTICLES = [
+  {
+    num: "1", title: "Оскорбление участников чата",
+    text: ["Оскорбление (сокращённо «оск») — умышленное унижение чести и достоинства собеседника, выраженное в неприличной или иной противоречащей общепринятой морали форме."],
+    terms: [
+      ["Унижение личности", "Отрицательная оценка человека, которая подрывает его авторитет."],
+      ["Неприличная форма", "Использование бранных, непристойных слов или неприличных действий."],
+      ["Умысел", "Намерение обидеть, задеть или унизить адресата."]
+    ],
+    penalties: [
+      "Временное ограничение права писать сообщения на 30 минут",
+      "Временное ограничение права писать сообщения на 35 минут",
+      "Окончательное отстранение навсегда"
+    ]
+  },
+  {
+    num: "2", title: "Порнография",
+    text: ["Порнография — любое сообщение с натуралистическим, детальным и непристойным изображением или описанием половых органов и половых актов с целью сексуального возбуждения."],
+    penalties: [
+      "Временное ограничение права писать сообщения на 35 минут",
+      "Временное ограничение права писать сообщения на 40 минут",
+      "Окончательное отстранение навсегда"
+    ]
+  },
+  {
+    num: "3", title: "Спам",
+    subtitle: "Большое количество текста",
+    text: ["Спам — отправка участником большого количества ненужных сообщений, по теме или не по теме."],
+    terms: [
+      ["Наводнение", "Отправка множества одинаковых, бессмысленных или повторяющихся сообщений, которые мешают общению."],
+      ["Вандализм", "Размещение огромных объёмов ненужного или вредного текста в одном месте."],
+      ["Скандал", "Провокации, чтобы вызвать у людей бурные негативные эмоции."]
+    ],
+    penalties: [
+      "Временное ограничение права писать сообщения на 15 минут",
+      "Временное ограничение права писать сообщения на 30 минут",
+      "Окончательное отстранение навсегда"
+    ]
+  },
+  {
+    num: "4", title: "Неонацистская и неофашистская символика",
+    subtitle: "Ультраправые личности, партии и темы",
+    text: ["Запрещаются оправдание, восхваление, пропаганда и показ ультраправых и правых политических личностей, партий и тем, а также неонацистской и неофашистской символики."],
+    terms: [
+      ["Нацизм", "Национал-социализм — политическая и расовая идеология, утверждающая превосходство одной нации над всеми остальными. Она делит людей на «высшие» и «низшие» сорта, оправдывает дискриминацию, насилие и уничтожение неугодных народов."],
+      ["Фашизм", "Жестокая политическая диктатура, при которой государство полностью подчиняет себе человека, а своя нация ставится выше всех остальных."],
+      ["Монархия", "Форма правления, при которой главой государства является один человек (монарх) — король, царь, император, султан или принц, а власть обычно передаётся по наследству. Запрещена в том числе либеральная, парламентская монархия."]
+    ],
+    penalties: [
+      "Временное ограничение права писать сообщения на 2 часа",
+      "Временное ограничение права писать сообщения на 4 часа",
+      "Окончательное отстранение навсегда"
+    ]
+  },
+  {
+    num: "5", title: "Расизм",
+    text: [
+      "Расизм — это убеждение в превосходстве одних рас, наций или народов над другими и унижение людей по признаку их происхождения или веры.",
+      "Запрещается оскорблять нацию, народ, национальность, этнос, субэтнос или религию — намеренно или нет."
+    ],
+    terms: [
+      ["Оскорбление нации", "Унизительные высказывания о народе, национальности, этносе или субэтносе."],
+      ["Оскорбление религии", "Насмешки и унижение верующих и их веры."],
+      ["Неумышленное оскорбление", "Оскорбление без намерения обидеть. Тоже считается нарушением."]
+    ],
+    penalties: [
+      "Временное ограничение права писать сообщения на 20 минут",
+      "Временное ограничение права писать сообщения на 30 минут",
+      "Временное ограничение права писать сообщения на 4 дня и строгое предупреждение"
+    ]
+  },
+  {
+    num: "6", title: "Реклама",
+    text: [
+      "Реклама — это любое сообщение, которое продвигает другой чат, канал, сайт, товар или услугу.",
+      "Запрещена любая реклама без разрешения главы ЛВСР или его заместителя. Скажем заранее: лидер всё равно не даст разрешения."
+    ],
+    terms: [
+      ["Прямая реклама", "Ссылки, приглашения в другие чаты и каналы, предложения что-либо купить."],
+      ["Скрытая реклама", "Продвижение чатов, каналов или товаров под видом обычного сообщения."],
+      ["Разрешение", "Даёт только глава ЛВСР или его заместитель."]
+    ],
+    penalties: [
+      "Временное ограничение права писать сообщения на 10 минут",
+      "Временное ограничение права писать сообщения на 40 минут",
+      "Временное ограничение права писать сообщения на 2 дня"
+    ]
+  },
+  {
+    num: "7", title: "Терроризм",
+    text: [
+      "Терроризм — это насилие или угроза насилием с целью запугать людей и оказать давление на власть.",
+      "Запрещены использование символики террористических организаций (признанных мировым сообществом), если это не в историческом, дискуссионном или высмеивающем ключе, поддержка устроенных ими терактов и шутки про это."
+    ],
+    terms: [
+      ["Символика", "Флаги, эмблемы, лозунги и другие знаки террористических организаций."],
+      ["Поддержка терактов", "Одобрение, оправдание или восхваление терактов и их участников."],
+      ["Исключение", "Исторический, дискуссионный или высмеивающий контекст."]
+    ],
+    penalties: [
+      "Временное ограничение права писать сообщения на 30 минут",
+      "Временное ограничение права писать сообщения на 45 минут",
+      "Временное ограничение права писать сообщения на 2 недели и строгое предупреждение"
+    ]
+  },
+  {
+    num: "8", title: "Публикация личных данных",
+    subtitle: "Докс, сват, деанон, взлом",
+    text: [
+      "Публикация личных данных — это распространение информации о человеке (имя, адрес, телефон, фото, место учёбы или работы и т.п.) без его согласия.",
+      "Запрещается выкладывать личные данные человека на всеобщее обозрение без его разрешения, а также совершать другие подобные нарушения."
+    ],
+    terms: [
+      ["Докс", "Сбор и публикация личных данных человека без его согласия."],
+      ["Сват", "Ложный вызов экстренных служб (полиции, скорой и т.п.) к человеку."],
+      ["Деанон", "Раскрытие реальной личности того, кто скрывается под ником."],
+      ["Взлом", "Получение доступа к чужим аккаунтам или устройствам."]
+    ],
+    penalties: [
+      "Временное ограничение права писать сообщения на 1 неделю",
+      "Окончательное отстранение навсегда"
+    ]
+  },
+  {
+    num: "9", title: "Жестокость",
+    text: [
+      "Жестокость (шок-контент) — это материалы, которые изображают насилие, гибель людей или животных и другие пугающие сцены.",
+      "Запрещено отправлять материалы с контентом 21+, а также контент с катастрофами и жестокостью (убийства, расчленёнка, трупы и так далее)."
+    ],
+    terms: [
+      ["Контент 21+", "Откровенные материалы, предназначенные только для взрослых."],
+      ["Катастрофы", "Кадры аварий, крушений, стихийных бедствий с пострадавшими."],
+      ["Насилие", "Убийства, расчленёнка, трупы, издевательства над людьми и животными."]
+    ],
+    penalties: [
+      "Временное ограничение права писать сообщения на 30 минут",
+      "Временное ограничение права писать сообщения на 1 день",
+      "Окончательное отстранение навсегда"
+    ]
+  }
+];
+
+const tg = window.Telegram && window.Telegram.WebApp;
+const inTelegram = !!(tg && tg.initData !== undefined && tg.platform && tg.platform !== "unknown");
+if (inTelegram) {
+  tg.ready();
+  tg.expand();
+} else {
+  document.body.classList.add("no-tg");
+}
+
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const isBan = s => /навсегда|бан/i.test(s);
+const nth = i => `${i + 1}-й раз`;
+
+function renderList(filter) {
+  const q = (filter || "").trim().toLowerCase();
+  const box = document.getElementById("arts");
+  const hits = ARTICLES.map((a, i) => [a, i]).filter(([a]) => {
+    if (!q) return true;
+    const hay = [a.num, a.title, a.subtitle || "", ...a.text, ...(a.terms || []).flat(), ...a.penalties].join(" ").toLowerCase();
+    return hay.includes(q);
+  });
+  if (!hits.length) { box.innerHTML = '<div class="empty">Ничего не найдено</div>'; return; }
+  box.innerHTML = hits.map(([a, i]) => `
+    <button class="item" data-open="${i}">
+      <div class="num">${esc(a.num)}</div>
+      <div class="t"><b>${esc(a.title)}</b><span>${esc(a.subtitle || a.text[0])}</span></div>
+      <div class="chev">›</div>
+    </button>`).join("");
+}
+
+function renderIntro() {
+  return `
+    <div class="art-head"><div class="num">§</div><h2>${esc(INTRO.title)}</h2></div>
+    <div class="card" style="margin-top:14px">
+      ${INTRO.paragraphs.map(p => `<p>${esc(p)}</p>`).join("")}
+    </div>
+    <div class="label">Термины наказаний</div>
+    <div class="card">${INTRO.terms.map(([k, v]) =>
+      `<div class="term"><b>${esc(k)}</b>${esc(v)}</div>`).join("")}</div>
+    <div class="sign">${esc(INTRO.sign)}</div>`;
+}
+
+function renderArticle(a) {
+  let h = `
+    <div class="art-head"><div class="num">Статья ${esc(a.num)}</div><h2>${esc(a.title)}</h2>
+      ${a.subtitle ? `<div style="color:var(--hint);margin-top:4px">${esc(a.subtitle)}</div>` : ""}</div>
+    <div class="card" style="margin-top:14px">${a.text.map(p => `<p>${esc(p)}</p>`).join("")}</div>`;
+  if (a.terms) {
+    h += `<div class="label">Термины</div><div class="card">${a.terms.map(([k, v]) =>
+      `<div class="term"><b>${esc(k)}</b>${esc(v)}</div>`).join("")}</div>`;
+  }
+  h += `<div class="label">Наказание за нарушение</div><div class="card">${a.penalties.map((p, i) =>
+    `<div class="pen${isBan(p) ? " ban" : ""}"><div class="n">${i + 1}</div><div><div class="w">${nth(i)}</div>${esc(p)}</div></div>`).join("")}</div>`;
+  return h;
+}
+
+function open(key) {
+  document.getElementById("viewBody").innerHTML = key === "intro" ? renderIntro() : renderArticle(ARTICLES[+key]);
+  document.getElementById("home").classList.remove("on");
+  document.getElementById("view").classList.add("on");
+  window.scrollTo(0, 0);
+  if (inTelegram) { tg.BackButton.show(); tg.HapticFeedback && tg.HapticFeedback.impactOccurred("light"); }
+}
+
+function goHome() {
+  document.getElementById("view").classList.remove("on");
+  document.getElementById("home").classList.add("on");
+  if (inTelegram) tg.BackButton.hide();
+}
+
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-open]");
+  if (b) open(b.dataset.open);
+});
+document.getElementById("backBtn").addEventListener("click", goHome);
+document.getElementById("q").addEventListener("input", e => renderList(e.target.value));
+if (inTelegram) tg.BackButton.onClick(goHome);
+
+renderList("");
+</script>
+</body>
+</html>
