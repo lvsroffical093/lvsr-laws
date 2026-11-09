@@ -162,6 +162,9 @@ def clean_chat_commands(chat_id):
         log("Не удалось сбросить старые команды в чате:", e)
 
 
+MAX_AGE = 120  # секунд: команды старше этого игнорируем
+
+
 def handle(update, bot_username):
     msg = update.get("message")
     if not msg or "text" not in msg:
@@ -176,6 +179,12 @@ def handle(update, bot_username):
     # Отвечаем только на /info. /start — лишь в личке (это кнопка «Начать» при первом заходе к боту).
     if not (command == "/info" or (command == "/start" and is_private)):
         return
+    # Пока компьютер был выключен, Telegram копил команды. Старые не отвечаем,
+    # иначе после включения бот сам «выплёвывает» сообщения в чат.
+    if time.time() - msg.get("date", 0) > MAX_AGE:
+        log(f"Пропущена старая команда {command} в чате {msg['chat'].get('title') or 'личка'}")
+        return
+    log(f"Ответ на {command} в чате {msg['chat'].get('title') or 'личка'}")
     send_laws(msg["chat"]["id"], laws_keyboard(msg["chat"]["type"], bot_username))
 
 
