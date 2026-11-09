@@ -164,8 +164,27 @@ def clean_chat_commands(chat_id):
 
 MAX_AGE = 120  # секунд: команды старше этого игнорируем
 
+GREETING = (
+    "Доброго времени, товарищ! С вами говорит Пионерка «Латвийская ВСР», "
+    "и я появилась, чтобы помочь вам. Напишите /info, чтобы получить информацию.\n\n"
+    "Если не можете зайти сразу, значит, ваша заявка ожидает рассмотрения "
+    "Администрацией чата «Гражданский чат ЛВСР» 😄"
+)
+
+
+def handle_join_request(req):
+    # Человек подал заявку на вступление в группу — пишем ему в личку.
+    if time.time() - req.get("date", 0) > MAX_AGE:
+        log("Пропущена старая заявка на вступление")
+        return
+    call("sendMessage", chat_id=req.get("user_chat_id") or req["from"]["id"], text=GREETING)
+    log(f"Приветствие отправлено: заявка в чат {req['chat'].get('title')}")
+
 
 def handle(update, bot_username):
+    if "chat_join_request" in update:
+        handle_join_request(update["chat_join_request"])
+        return
     msg = update.get("message")
     if not msg or "text" not in msg:
         return
@@ -204,7 +223,7 @@ def main():
     offset = 0
     while True:
         try:
-            updates = call("getUpdates", offset=offset, timeout=30, allowed_updates=["message"])
+            updates = call("getUpdates", offset=offset, timeout=30, allowed_updates=["message", "chat_join_request"])
             for upd in updates:
                 offset = upd["update_id"] + 1
                 try:
