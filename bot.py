@@ -172,20 +172,22 @@ GREETING = (
 )
 
 
-def handle_join_request(req):
-    # Человек подал заявку на вступление в группу — пишем ему в личку.
-    if time.time() - req.get("date", 0) > MAX_AGE:
-        log("Пропущена старая заявка на вступление")
+def greet_post(msg):
+    # Новый пост канала автоматически попадает в группу обсуждения —
+    # отвечаем на него, и наш ответ становится первым комментарием.
+    if time.time() - msg.get("date", 0) > MAX_AGE:
+        log("Пропущен старый пост канала")
         return
-    call("sendMessage", chat_id=req.get("user_chat_id") or req["from"]["id"], text=GREETING)
-    log(f"Приветствие отправлено: заявка в чат {req['chat'].get('title')}")
+    call("sendMessage", chat_id=msg["chat"]["id"], text=GREETING,
+         reply_parameters={"message_id": msg["message_id"]})
+    log(f"Первый комментарий под постом в чате {msg['chat'].get('title')}")
 
 
 def handle(update, bot_username):
-    if "chat_join_request" in update:
-        handle_join_request(update["chat_join_request"])
-        return
     msg = update.get("message")
+    if msg and msg.get("is_automatic_forward"):
+        greet_post(msg)
+        return
     if not msg or "text" not in msg:
         return
     if msg["chat"]["type"] != "private":
@@ -223,7 +225,7 @@ def main():
     offset = 0
     while True:
         try:
-            updates = call("getUpdates", offset=offset, timeout=30, allowed_updates=["message", "chat_join_request"])
+            updates = call("getUpdates", offset=offset, timeout=30, allowed_updates=["message"])
             for upd in updates:
                 offset = upd["update_id"] + 1
                 try:
